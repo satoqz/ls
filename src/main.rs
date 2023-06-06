@@ -10,14 +10,18 @@ fn main() {
     let cwd = cwd().unwrap_or_else(|err| err.print_and_exit());
     let path = parse_args().map(|path| cwd.join(path)).unwrap_or(cwd);
 
-    let entries = entry::read_entries(path, all);
+    let mut entries = entry::read_entries(path, all).unwrap_or_else(|err| err.print_and_exit());
+    entries.sort();
 
-    match entries {
-        Ok(mut entries) => {
-            entries.sort();
-            entry::print_entries(entries, long);
-        }
-        Err(err) => err.print_and_exit(),
+    if long {
+        let long_entries: Vec<entry::LongEntry> = entries
+            .into_iter()
+            .map(entry::Entry::try_into)
+            .collect::<Result<Vec<_>>>()
+            .unwrap_or_else(|err| err.print_and_exit());
+        entry::print_entries_long(long_entries);
+    } else {
+        entry::print_entries_short(entries);
     }
 }
 
