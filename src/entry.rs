@@ -41,7 +41,7 @@ impl TryFrom<fs::DirEntry> for Entry {
 impl fmt::Display for Entry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {
-            Kind::Directory => write!(f, "{}", self.name.blue().bold()),
+            Kind::Directory => write!(f, "{}/", self.name.blue().bold()),
             Kind::Symlink => write!(f, "{}", self.name.bright_blue().underline()),
             Kind::File => write!(f, "{}", self.name),
         }
