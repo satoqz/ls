@@ -201,15 +201,25 @@ pub fn read_entries(path: path::PathBuf, all: bool) -> Result<Vec<Entry>> {
 
 pub fn print_entries_short(entries: Vec<Entry>) {
     let Width(width) = terminal_size().map_or(Width(80), |size| size.0);
+
+    // everything can fit in one line, don't bother with creating an aligned table
+    if width as usize >= entries.iter().fold(0, |acc, entry| acc + entry.len() + 2) - 2 {
+        for (index, entry) in entries.iter().enumerate() {
+            if index == entries.len() - 1 {
+                println!("{entry}");
+            } else {
+                print!("{entry}  ");
+            }
+        }
+
+        return;
+    }
+
     let max_entry_width = entries.iter().map(Entry::len).max().unwrap_or(0);
-
     let entries_per_line = (width as usize) / (max_entry_width + 2);
-    let mut entry_idx: usize = 0;
 
-    for entry in entries {
-        entry_idx += 1;
-        if entry_idx >= entries_per_line {
-            entry_idx = 0;
+    for (index, entry) in entries.iter().enumerate() {
+        if (index + 1) % entries_per_line == 0 {
             println!("{entry}");
         } else {
             print!("{entry}{}  ", " ".repeat(max_entry_width - entry.len()));
@@ -217,7 +227,7 @@ pub fn print_entries_short(entries: Vec<Entry>) {
     }
 
     // last print wasn't a `println`, add final newline
-    if entry_idx != 0 {
+    if entries.len() % entries_per_line != 0 {
         println!();
     }
 }
