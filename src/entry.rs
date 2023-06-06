@@ -72,7 +72,7 @@ pub fn print_entries(entries: Vec<Entry>, long: bool) {
         return;
     }
 
-    let Width(width) = terminal_size().map_or(Width(0), |size| size.0);
+    let Width(width) = terminal_size().map_or(Width(80), |size| size.0);
 
     let entries = entries
         .into_iter()
