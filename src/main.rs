@@ -7,7 +7,10 @@ use std::{env, path};
 fn main() {
     let (all, long) = parse_flags();
 
-    let cwd = cwd().unwrap_or_else(|err| err.print_and_exit());
+    let cwd = env::current_dir()
+        .map_err(Error::from)
+        .unwrap_or_else(|err| err.print_and_exit());
+
     let path = parse_args().map(|path| cwd.join(path)).unwrap_or(cwd);
 
     let mut entries = entry::read_entries(path, all).unwrap_or_else(|err| err.print_and_exit());
@@ -23,10 +26,6 @@ fn main() {
     } else {
         entry::print_entries_short(entries);
     }
-}
-
-fn cwd() -> Result<path::PathBuf> {
-    env::current_dir().map_err(Error::from)
 }
 
 fn parse_flags() -> (bool, bool) {
